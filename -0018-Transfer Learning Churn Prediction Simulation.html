@@ -1,0 +1,47 @@
+<div class="container">
+    <h1>Transfer Learning Churn Prediction Simulation</h1>
+    <p class="explanation">
+        <strong>Method:</strong> Transfer Learning uses a model trained on a large, generic dataset (Source Task: Predict churn at a large public university) and adapts its learned weights to a smaller, related dataset (Target Task: Predict churn at a specific private college). This is highly useful when the target institution has limited historical data.
+    </p>
+
+    <label for="source_risk">1. Base Risk from Large "Source" Model (0.0 - 1.0):</label>
+    <input type="number" id="source_risk" value="0.70" min="0.0" max="1.0" step="0.05">
+    
+    <label for="local_adjustment">2. Local Adjustment Factor (Local Success/Failure, +/- 0.0 - 0.2):</label>
+    <input type="number" id="local_adjustment" value="-0.15" min="-0.2" max="0.2" step="0.05">
+
+    <button onclick="predictTransfer()">Calculate Localized Risk</button>
+    <div id="result_transfer"></div>
+</div>
+
+<script>
+// --- Transfer Learning Churn Simulation in JavaScript ---
+
+function predictTransfer() {
+    const sourceRisk = parseFloat(document.getElementById('source_risk').value);
+    const localAdjustment = parseFloat(document.getElementById('local_adjustment').value);
+
+    // Final Localized Risk = Source Risk + Local Adjustment
+    const localizedRisk = Math.min(1.0, Math.max(0.0, sourceRisk + localAdjustment));
+    const churnRisk = (localizedRisk * 100).toFixed(1);
+
+    const resultDiv = document.getElementById('result_transfer');
+    
+    let message = `<h2>TRANSFER LEARNING REPORT</h2>`;
+    message += `<p><strong>Base Risk (Source Institution):</strong> ${(sourceRisk * 100).toFixed(1)}%</p>`;
+    message += `<p><strong>Local Adjustment: ${localAdjustment > 0 ? '+' : ''}${(localAdjustment * 100).toFixed(1)}%</strong></p>`;
+    message += `<p><strong>Localized Churn Risk: <span style="font-size: 1.5em; color: ${churnRisk >= 60 ? 'red' : 'green'};">${churnRisk}%</span></strong></p>`;
+
+    if (localAdjustment < 0 && localizedRisk < sourceRisk) {
+        message += `<p><strong>ACTION:</strong> The local model successfully fine-tuned the prediction downwards (the student is slightly safer locally). This suggests the student's local features (e.g., smaller class sizes) are mitigating the generic risk.</p>`;
+    } else if (localAdjustment > 0 && localizedRisk > sourceRisk) {
+        message += `<p><strong>ACTION:</strong> The local model increased the risk. This indicates that local factors (e.g., high tuition, lack of specific local support) exacerbate the general risk profile. Intervention is necessary.</p>`;
+    } else {
+         message += `<p><strong>ACTION:</strong> The prediction is stable. The benefit of transfer learning is validated as a good baseline for the local environment.</p>`;
+    }
+
+    document.getElementById('result_transfer').innerHTML = message;
+}
+</script>
+</body>
+</html>
